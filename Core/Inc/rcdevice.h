@@ -114,6 +114,10 @@ typedef struct{
 
 void get_device_info(runcamDevice_t* device);
 void init_device(runcamDevice_t* device, UART_HandleTypeDef* uart, uint8_t recieveRetries);
+
 runcamDeviceRecordingTime_t get_remaining_recording_time(runcamDevice_t* device);
 void toggle_recording(runcamDevice_t* device);
 bool is_currently_recording(runcamDevice_t* device);
+
+void start_recording(runcamDevice_t* device);
+void stop_recording(runcamDevice_t* device);

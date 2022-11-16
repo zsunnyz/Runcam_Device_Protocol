@@ -109,6 +109,14 @@ int main(void)
   while (1)
   {
 	  stop_recording(&rcDevice);
+	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 1);
+	  HAL_Delay(20);
+	  stop_recording(&rcDevice);
+	  HAL_Delay(20);
+	  start_recording(&rcDevice);
+	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 0);
+	  HAL_Delay(20);
+	  start_recording(&rcDevice);
 	  HAL_Delay(20);
     /* USER CODE END WHILE */
 

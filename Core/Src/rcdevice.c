@@ -45,6 +45,7 @@ void init_device(runcamDevice_t* device, UART_HandleTypeDef* uart, uint8_t recie
 	device->uart = uart;
 	device->recieveRetries = recieveRetries;
 	device->currentRecordingTime = get_remaining_recording_time(device);
+	device->isRecording = is_currently_recording(device);
 	get_device_info(device);
 }
 
@@ -223,17 +224,21 @@ bool is_currently_recording(runcamDevice_t* device)
 	device->currentRecordingTime = get_remaining_recording_time(device);
 	HAL_Delay(1500); // TODO: CHANGE INTO SOMETHING ELSE
 	if (get_remaining_recording_time(device).time_int < device->currentRecordingTime.time_int){
+		device->isRecording = true;
 		return true;
 	}
 	else {
+		device->isRecording = false;
 		return false;
 	}
 }
 
+// Need to raise an error if command is sent but not recording somehow
 void start_recording(runcamDevice_t* device)
 {
 	if(!is_currently_recording(device)){
 		toggle_recording(device);
+		is_currently_recording(device); // use the function to change the recording status member in the structure
 	}
 	return;
 }
@@ -242,6 +247,7 @@ void stop_recording(runcamDevice_t* device)
 {
 	if(is_currently_recording(device)){
 		toggle_recording(device);
+		is_currently_recording(device);
 	}
 	return;
 }
