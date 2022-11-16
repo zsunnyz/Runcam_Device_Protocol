@@ -136,7 +136,6 @@ typedef struct{
 	uint8_t dataLen;
 	uint8_t crc;
 	uint8_t remaining_chunks;
-	uint8_t setting_type;
 	bool correct_crc;
 } runcamDeviceRecieveData_t;
 
