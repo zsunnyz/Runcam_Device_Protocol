@@ -53,34 +53,6 @@ typedef enum {
     RCDEVICE_PROTOCOL_CAM_CTRL_UNKNOWN_CAMERA_OPERATION = 0xFF
 } rcdevice_camera_control_opeation_e;
 
-// Operation Of 5 Key OSD Cable Simulation
-typedef enum {
-    RCDEVICE_PROTOCOL_5KEY_SIMULATION_NONE  = 0x00,
-    RCDEVICE_PROTOCOL_5KEY_SIMULATION_SET   = 0x01,
-    RCDEVICE_PROTOCOL_5KEY_SIMULATION_LEFT  = 0x02,
-    RCDEVICE_PROTOCOL_5KEY_SIMULATION_RIGHT = 0x03,
-    RCDEVICE_PROTOCOL_5KEY_SIMULATION_UP    = 0x04,
-    RCDEVICE_PROTOCOL_5KEY_SIMULATION_DOWN  = 0x05
-} rcdevice_5key_simulation_operation_e;
-
-// Operation of RCDEVICE_PROTOCOL_COMMAND_5KEY_CONNECTION
-typedef enum {
-    RCDEVICE_PROTOCOL_5KEY_CONNECTION_OPEN = 0x01,
-    RCDEVICE_PROTOCOL_5KEY_CONNECTION_CLOSE = 0x02
-} rcdevice_5key_connection_event_e;
-
-typedef enum {
-    RCDEVICE_CAM_KEY_NONE,
-    RCDEVICE_CAM_KEY_ENTER,
-    RCDEVICE_CAM_KEY_LEFT,
-    RCDEVICE_CAM_KEY_UP,
-    RCDEVICE_CAM_KEY_RIGHT,
-    RCDEVICE_CAM_KEY_DOWN,
-    RCDEVICE_CAM_KEY_CONNECTION_CLOSE,
-    RCDEVICE_CAM_KEY_CONNECTION_OPEN,
-    RCDEVICE_CAM_KEY_RELEASE,
-} rcdeviceCamSimulationKeyEvent_e;
-
 //	Device Setting IDs
 typedef enum {
 	RCDEVICE_SID_DISP_CHARSET				= 0x00,
@@ -128,6 +100,7 @@ typedef struct{
 	UART_HandleTypeDef* uart;
 	uint8_t recieveRetries;
 	runcamDeviceRecordingTime_t currentRecordingTime;
+	bool isRecording;
 } runcamDevice_t;
 
 typedef struct{
@@ -142,3 +115,5 @@ typedef struct{
 void get_device_info(runcamDevice_t* device);
 void init_device(runcamDevice_t* device, UART_HandleTypeDef* uart, uint8_t recieveRetries);
 runcamDeviceRecordingTime_t get_remaining_recording_time(runcamDevice_t* device);
+void toggle_recording(runcamDevice_t* device);
+bool is_currently_recording(runcamDevice_t* device);

@@ -39,6 +39,7 @@ static uint8_t runcamDeviceGetRespLen(uint8_t command)
  * @param device (runcamDevice_t*): A pointer to the device structure
  * @param uart (UART_HandleTypeDef*): A pointer to the uart the runcam is connected to
  * @param recieveRetries (uint8_t): How many times a command should be done if the crc fails
+ * @param recordTimer (TIM_HandleTypeDef*): The timer used to generate an interrupt to check the recording status
  */
 void init_device(runcamDevice_t* device, UART_HandleTypeDef* uart, uint8_t recieveRetries) {
 	device->uart = uart;
@@ -106,7 +107,7 @@ void recieve_data_fixed_len(runcamDevice_t* device, runcamDeviceRecieveData_t* d
 	data->header = rxBuf[0];
 	data->dataLen = packetLen - 2;
 
-	data->data = (uint8_t *)malloc(data->dataLen);
+	data->data = (uint8_t *)malloc(data->dataLen); // will leak memory but idk how to fix
 	for(int i = 0; i < data->dataLen; i ++){
 		data->data[i] = rxBuf[i + 1];
 	}
@@ -132,7 +133,7 @@ void recieve_data_unkown_len(runcamDevice_t* device, runcamDeviceRecieveData_t* 
 	HAL_UART_Receive(device->uart, &rxBuf, 1, 1);
 	data->dataLen = rxBuf;
 
-	data->data = (uint8_t *) malloc(data->dataLen);
+	data->data = (uint8_t *) malloc(data->dataLen);  // will leak memory but idk how to fix
 	HAL_UART_Receive(device->uart, data->data, data->dataLen, 10);
 
 	HAL_UART_Receive(device->uart, &rxBuf, 1, 1);
@@ -201,7 +202,46 @@ runcamDeviceRecordingTime_t get_remaining_recording_time(runcamDevice_t* device)
 		remaining_time.time_str = (char*)(++recTimeData.data);
 		remaining_time.strLen = recTimeData.dataLen-1;
 		remaining_time.time_int = atoi(remaining_time.time_str);
-		return remaining_time;
 	}
 	return remaining_time;
+}
+
+void toggle_recording(runcamDevice_t* device)
+{
+	uint8_t actionID = RCDEVICE_PROTOCOL_FEATURE_SIMULATE_POWER_BUTTON;
+	send_command(device, RCDEVICE_PROTOCOL_COMMAND_CAMERA_CONTROL, &actionID, 1);
+}
+
+/**
+ * @brief checks if the runcam is currently recording
+ *
+ * @param device (runcamDevice_t*): the runcam device to check
+ * @return (bool): if the runcam is currently recording or not
+ */
+bool is_currently_recording(runcamDevice_t* device)
+{
+	device->currentRecordingTime = get_remaining_recording_time(device);
+	HAL_Delay(1500); // TODO: CHANGE INTO SOMETHING ELSE
+	if (get_remaining_recording_time(device).time_int < device->currentRecordingTime.time_int){
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+void start_recording(runcamDevice_t* device)
+{
+	if(!is_currently_recording(device)){
+		toggle_recording(device);
+	}
+	return;
+}
+
+void stop_recording(runcamDevice_t* device)
+{
+	if(is_currently_recording(device)){
+		toggle_recording(device);
+	}
+	return;
 }
